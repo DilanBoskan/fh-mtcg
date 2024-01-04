@@ -9,6 +9,8 @@ using System.Text.RegularExpressions;
 
 namespace Server.Controllers;
 
+public record TradeModel(Guid Id, Guid CardToTrade, CardType Type, int MinimumDamage);
+
 public class TradingController : ControllerBase, ITradingController {
     private readonly ITradingService _tradingService;
     private readonly ICardsService _cardsService;
@@ -30,9 +32,9 @@ public class TradingController : ControllerBase, ITradingController {
 
     [RequiresAuthorization]
     public async Task<HttpResponse> CreateAsync(HttpRequest request) {
-        if (!Serializer.TryDeserialize<Trade>(request.Body, out var trade))
+        if (!Serializer.TryDeserialize<TradeModel>(request.Body, out var tradeModel))
             return CreateBadRequestResponse();
-        trade.OwnerUsername = request.Authorization!.Username;
+        var trade = new Trade(tradeModel.Id, request.Authorization!.Username, tradeModel.CardToTrade, tradeModel.Type, tradeModel.MinimumDamage);
 
         var canTrade = await _cardsService.CanTradeAsync(request.Authorization!.Username, trade.CardToTrade);
         if (!canTrade)

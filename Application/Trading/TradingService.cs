@@ -23,18 +23,21 @@ public class TradingService : ITradingService {
         ArgumentNullException.ThrowIfNull(receiverCard);
         ArgumentNullException.ThrowIfNull(senderCard);
 
-        // Update receiver cards
+        // Remove cards from both decks and add them back to the new owner
         var receiverCards = (await _cardsRepository.GetAsync(trade.OwnerUsername)).ToList();
-        receiverCards.RemoveAll(c => c.Id == receiverCard.Id);
-        receiverCards.Add(senderCard);
-        await _cardsRepository.UpdateAsync(trade.OwnerUsername, receiverCards);
-
-        // Update retriever cards
         var senderCards = (await _cardsRepository.GetAsync(username)).ToList();
+
+        receiverCards.RemoveAll(c => c.Id == receiverCard.Id);
         senderCards.RemoveAll(c => c.Id == senderCard.Id);
-        senderCards.Add(receiverCard);
+
+        await _cardsRepository.UpdateAsync(trade.OwnerUsername, receiverCards);
         await _cardsRepository.UpdateAsync(username, senderCards);
 
+        receiverCards.Add(senderCard);
+        senderCards.Add(receiverCard);
+
+        await _cardsRepository.UpdateAsync(trade.OwnerUsername, receiverCards);
+        await _cardsRepository.UpdateAsync(username, senderCards);
 
         await DeleteAsync(tradeId);
     }

@@ -22,7 +22,6 @@ var serviceProvider = new ServiceCollection()
             .BuildServiceProvider();
 var dbSetup = serviceProvider.GetRequiredService<DatabaseConfiguration>();
 await dbSetup.InitializeAsync();
-await dbSetup.ClearDatabaseAsync();
 
 bool running = true;
 Console.CancelKeyPress += (object? sender, ConsoleCancelEventArgs e) => {

@@ -121,7 +121,7 @@ public class HttpServer {
 
         UserAuthorization? userAuthorization = null;
         if (headers.TryGetValue("Authorization", out var authorizationValue)) {
-            userAuthorization = ExtractUserAuthorizationFromAuthorizationHeaderValueAsync(authorizationValue);
+            userAuthorization = ExtractUserAuthorizationFromAuthorizationHeaderValue(authorizationValue);
             if (userAuthorization is null)
                 throw new InvalidAuthorizationValueException();
         }
@@ -166,7 +166,7 @@ public class HttpServer {
         }
         return headers;
     }
-    private UserAuthorization? ExtractUserAuthorizationFromAuthorizationHeaderValueAsync(string headerValue) {
+    private static UserAuthorization? ExtractUserAuthorizationFromAuthorizationHeaderValue(string headerValue) {
         if (string.IsNullOrEmpty(headerValue))
             return null;
 

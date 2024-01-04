@@ -10,7 +10,4 @@ internal class InvalidAuthorizationValueException : Exception {
 
     public InvalidAuthorizationValueException(string? message, Exception? innerException) : base(message, innerException) {
     }
-
-    protected InvalidAuthorizationValueException(SerializationInfo info, StreamingContext context) : base(info, context) {
-    }
 }

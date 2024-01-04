@@ -10,7 +10,4 @@ internal class UnableToHandleHttpRequestException : Exception {
 
     public UnableToHandleHttpRequestException(string? message, Exception? innerException) : base(message, innerException) {
     }
-
-    protected UnableToHandleHttpRequestException(SerializationInfo info, StreamingContext context) : base(info, context) {
-    }
 }

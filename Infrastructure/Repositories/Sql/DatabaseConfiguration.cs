@@ -31,7 +31,6 @@ public class DatabaseConfiguration : RepositoryBase {
             """;
         await command.ExecuteNonQueryAsync();
 
-        #region Simple Tables
 
         // Cards
         command.CommandText = """
@@ -45,18 +44,6 @@ public class DatabaseConfiguration : RepositoryBase {
             """;
         await command.ExecuteNonQueryAsync();
 
-        // Trades
-        command.CommandText = """
-            CREATE TABLE IF NOT EXISTS Trades (
-                Id UUID PRIMARY KEY,
-                CardToTrade UUID NOT NULL REFERENCES Cards(Id) ON DELETE CASCADE,
-                Type CardType NOT NULL,
-                MinimumDamage INT NOT NULL
-            );
-            """;
-        await command.ExecuteNonQueryAsync();
-
-        #endregion
 
         // Users
         command.CommandText = """
@@ -84,6 +71,19 @@ public class DatabaseConfiguration : RepositoryBase {
             );
             """;
         await command.ExecuteNonQueryAsync();
+
+        // Trades
+        command.CommandText = """
+            CREATE TABLE IF NOT EXISTS Trades (
+                Id UUID PRIMARY KEY,
+                UserId UUID REFERENCES Users(Id) ON DELETE CASCADE,
+                CardToTrade UUID NOT NULL REFERENCES Cards(Id) ON DELETE CASCADE,
+                Type CardType NOT NULL,
+                MinimumDamage INT NOT NULL
+            );
+            """;
+        await command.ExecuteNonQueryAsync();
+
 
         // Packages
         command.CommandText = """

@@ -16,7 +16,7 @@ public class TradingRepository : RepositoryBase, ITradingRepository {
         await using var connection = _dataSource.CreateConnection();;
         await connection.OpenAsync();
 
-        string commandText = "SELECT Id, CardToTrade, Type, MinimumDamage FROM Trades;";
+        string commandText = "SELECT Id, (SELECT Username FROM Users WHERE Id = UserId), CardToTrade, Type, MinimumDamage FROM Trades;";
 
         await using var command = new NpgsqlCommand(commandText, connection);
 
@@ -25,9 +25,10 @@ public class TradingRepository : RepositoryBase, ITradingRepository {
         {
             trades.Add(new Trade(
                 reader.GetGuid(0),
-                reader.GetGuid(1),
-                (CardType)Enum.Parse(typeof(CardType), reader.GetString(2)),
-                reader.GetInt32(3)
+                reader.GetString(1),
+                reader.GetGuid(2),
+                Enum.Parse<CardType>(reader.GetString(3)),
+                reader.GetInt32(4)
             ));
         }
 
@@ -39,7 +40,7 @@ public class TradingRepository : RepositoryBase, ITradingRepository {
         await connection.OpenAsync();
 
         string commandText = """
-            SELECT Id, CardToTrade, Type, MinimumDamage
+            SELECT Id, (SELECT Username FROM Users WHERE Id = UserId), CardToTrade, Type, MinimumDamage
             FROM Trades
             WHERE Id = @Id;
             """;
@@ -52,9 +53,10 @@ public class TradingRepository : RepositoryBase, ITradingRepository {
         {
             return new Trade(
                 reader.GetGuid(0),
-                reader.GetGuid(1),
-                Enum.Parse<CardType>(reader.GetString(2)),
-                reader.GetInt32(3)
+                reader.GetString(1),
+                reader.GetGuid(2),
+                Enum.Parse<CardType>(reader.GetString(3)),
+                reader.GetInt32(4)
             );
         }
 
@@ -66,12 +68,13 @@ public class TradingRepository : RepositoryBase, ITradingRepository {
         await connection.OpenAsync();
 
         string commandText = """
-            INSERT INTO Trades (Id, CardToTrade, Type, MinimumDamage) 
-            VALUES (@Id, @CardToTrade, @Type, @MinimumDamage);
+            INSERT INTO Trades (Id, UserId, CardToTrade, Type, MinimumDamage) 
+            VALUES (@Id, (SELECT Id FROM Users WHERE Username = @Username), @CardToTrade, @Type::CardType, @MinimumDamage);
             """;
 
         await using var command = new NpgsqlCommand(commandText, connection);
         command.Parameters.AddWithValue("@Id", trade.Id);
+        command.Parameters.AddWithValue("@Username", trade.OwnerUsername);
         command.Parameters.AddWithValue("@CardToTrade", trade.CardToTrade);
         command.Parameters.AddWithValue("@Type", trade.Type.ToString());
         command.Parameters.AddWithValue("@MinimumDamage", trade.MinimumDamage);
